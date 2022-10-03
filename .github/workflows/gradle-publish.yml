@@ -43,7 +43,7 @@ jobs:
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
           sudo mv /Applications/Xcode_12.4.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
-          brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake5
+          brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake
           mkdir moe-ci
           cd moe-ci
           repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
