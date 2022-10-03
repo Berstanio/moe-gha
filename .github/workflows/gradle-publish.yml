@@ -1,0 +1,78 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
+
+name: Gradle Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      sign:
+        type: boolean
+        description: Whether to make a release
+        required: true
+        
+  
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: build
+      run: |
+          sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
+          sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
+          sudo mv /Applications/Xcode_12.4.app /Applications/Xcode.app
+          sudo xcode-select -switch /Applications/Xcode.app
+          brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo
+          mkdir moe-ci
+          cd moe-ci
+          repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
+          repo sync
+          cd prebuilts
+          ./gradlew llvm
+          cd ../moe/moe-core/
+          ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
+          cd ../tools/master/
+          ./gradlew sdk -Pmoe.tools.sdk.mac_only=true
+          
+    - name: Snapshot build deploy
+      if: github.event.inputs.release == 'false'
+      run: |
+          cd moe-ci/moe/tools/master
+          ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          
+    - name: Import GPG key
+      if: github.event.inputs.release == 'true'
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@1c6a9e9d3594f2d743f1b1dd7669ab0dfdffa922
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        
+    - name: Release deploy
+      if: github.event.inputs.release == 'false'
+      run: |
+          cd moe-ci/moe/tools/master
+          ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.keyId=${{ secrets.GPG_KEYID }} -Psigning.passphrase=${{ secrets.GPG_PASSPHRASE }} -Psigning.keyName=${{ secrets.GPG_KEYID }}
+
+      
