@@ -57,7 +57,7 @@ jobs:
           ./gradlew sdk -Pmoe.tools.sdk.mac_only=true
           
     - name: Snapshot build deploy
-      if: github.event.inputs.release == 'false'
+      if: github.event.inputs.release != 'true'
       run: |
           cd moe-ci/moe/tools/master
           ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
@@ -71,7 +71,7 @@ jobs:
         passphrase: ${{ secrets.GPG_PASSPHRASE }}
         
     - name: Release deploy
-      if: github.event.inputs.release == 'false'
+      if: github.event.inputs.release == 'true'
       run: |
           cd moe-ci/moe/tools/master
           ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.keyId=${{ secrets.GPG_KEYID }} -Psigning.passphrase=${{ secrets.GPG_PASSPHRASE }} -Psigning.keyName=${{ secrets.GPG_KEYID }}
