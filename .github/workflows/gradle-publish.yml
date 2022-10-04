@@ -41,7 +41,8 @@ jobs:
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_13.4.app /Applications/Xcode.app
+          ls -l /Applications/
+          sudo mv /Applications/Xcode_13.3.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake
