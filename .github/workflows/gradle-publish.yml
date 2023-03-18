@@ -44,23 +44,24 @@ jobs:
           sudo mv /Applications/Xcode_13.2.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
-          brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake
+          brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
           mkdir moe-ci
           cd moe-ci
           repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
           repo sync
           cd prebuilts
-          ./gradlew llvm
+          ./gradlew llvm mingw
           cd ../moe/moe-core/
           ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
+          ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
           cd ../tools/master/
-          ./gradlew sdk -Pmoe.tools.sdk.mac_only=true
+          ./gradlew sdk
           
     - name: Snapshot build deploy
       if: github.event.inputs.release != 'true'
       run: |
           cd moe-ci/moe/tools/master
-          ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
           
     - name: Import GPG key
       if: github.event.inputs.release == 'true'
@@ -74,6 +75,6 @@ jobs:
       if: github.event.inputs.release == 'true'
       run: |
           cd moe-ci/moe/tools/master
-          ./gradlew sdk publish -Pmoe.tools.sdk.mac_only=true -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.keyId=${{ secrets.GPG_KEYID }} -Psigning.passphrase=${{ secrets.GPG_PASSPHRASE }} -Psigning.keyName=${{ secrets.GPG_KEYID }}
+          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.keyId=${{ secrets.GPG_KEYID }} -Psigning.passphrase=${{ secrets.GPG_PASSPHRASE }} -Psigning.keyName=${{ secrets.GPG_KEYID }}
 
       
