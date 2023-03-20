@@ -39,8 +39,8 @@ jobs:
           cd prebuilts
           ./gradlew llvm
           
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
           name: llvm
           path: moe-ci/prebuilts/llvm/macos/lib/libclang.dylib
