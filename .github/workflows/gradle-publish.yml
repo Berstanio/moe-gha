@@ -52,8 +52,8 @@ jobs:
           cd prebuilts
           ./gradlew mingw
 
-      - uses: actions/download-artifact@v3
-        with:
+    - uses: actions/download-artifact@v3
+      with:
           name: llvm
     
     - name: Build MOE
