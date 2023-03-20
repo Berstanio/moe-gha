@@ -37,7 +37,7 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
-    - name: build
+    - name: Setup prebuild
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
@@ -50,8 +50,15 @@ jobs:
           repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
           repo sync
           cd prebuilts
-          ./gradlew llvm mingw
-          cd ../moe/moe-core/
+          ./gradlew mingw
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: llvm
+    
+    - name: Build MOE
+      run: |
+          cd moe-ci/moe/moe-core/
           ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
           ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
           cd ../tools/master/
