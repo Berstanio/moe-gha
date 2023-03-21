@@ -55,7 +55,11 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
           name: llvm
-    
+    - name: Inspect
+      run: |
+        ls -l
+        ls -l moe-ci/prebuilts/llvm/macos/lib/
+
     - name: Build MOE
       run: |
           cd moe-ci/moe/moe-core/
