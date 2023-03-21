@@ -88,10 +88,13 @@ jobs:
           repo sync
           cd prebuilts
           ./gradlew mingw
+          mkdir -p moe-ci/prebuilts/llvm/macos/lib/
 
     - uses: actions/download-artifact@v3
       with:
           name: llvm
+          path: moe-ci/prebuilts/llvm/macos/lib/
+          
     - name: Inspect
       run: |
         ls -l
