@@ -39,6 +39,7 @@ jobs:
 
     - name: build
       run: |
+          ls -l /Applications/
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
           sudo mv /Applications/Xcode_13.2.app /Applications/Xcode.app
