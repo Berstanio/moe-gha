@@ -41,7 +41,7 @@ jobs:
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_14.2.app /Applications/Xcode.app
+          sudo mv /Applications/Xcode_15.2.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
@@ -78,7 +78,7 @@ jobs:
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_14.2.app /Applications/Xcode.app
+          sudo mv /Applications/Xcode_15.2.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
