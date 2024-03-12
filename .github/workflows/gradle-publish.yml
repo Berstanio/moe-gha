@@ -22,7 +22,7 @@ on:
 jobs:
   prebuild:
 
-    runs-on: macos-13
+    runs-on: macos-14
     permissions:
       contents: read
       packages: write
@@ -59,7 +59,7 @@ jobs:
           path: moe-ci/prebuilts/llvm/macos/lib/libclang.dylib
   build:
     needs: prebuild
-    runs-on: macos-13
+    runs-on: macos-14
     permissions:
       contents: read
       packages: write
