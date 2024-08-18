@@ -119,13 +119,12 @@ jobs:
       id: import_gpg
       uses: crazy-max/ghaction-import-gpg@1c6a9e9d3594f2d743f1b1dd7669ab0dfdffa922
       with:
-        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        gpg-private-key: ${{ secrets.MOE_RELEASE_PRIVATE_KEY }}
         
     - name: Release deploy
       if: github.event.inputs.release == 'true'
       run: |
           cd moe-ci/moe/tools/master
-          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.keyId=${{ secrets.GPG_KEYID }} -Psigning.passphrase=${{ secrets.GPG_PASSPHRASE }} -Psigning.keyName=${{ secrets.GPG_KEYID }}
+          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=4943DF1A9C3CA4916C5BFBF9C6511FC16A27B5BB
 
       
