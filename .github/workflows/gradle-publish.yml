@@ -10,9 +10,10 @@ name: Gradle Package
 on:
   workflow_dispatch:
     inputs:
-      sign:
+      release:
         type: boolean
         description: Whether to make a release
+        default: false
         required: true
         
   
@@ -20,8 +21,22 @@ on:
     types: [ published ]
 
 jobs:
-  prebuild:
+  verify-release-config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Test for release
+        if: ${{ inputs.release }}
+        run: echo "Building release version"
+      
+      - name: Test for snapshot
+        if: ${{ inputs.release == 'false' }}
+        run: echo "Building snapshot version"
 
+  prebuild:
     runs-on: macos-14
     permissions:
       contents: read
@@ -58,7 +73,7 @@ jobs:
           name: llvm
           path: moe-ci/prebuilts/llvm/macos/lib/libclang.dylib
   build:
-    needs: prebuild
+    needs: [prebuild, verify-release-config]
     runs-on: macos-14
     permissions:
       contents: read
@@ -109,13 +124,13 @@ jobs:
           ./gradlew sdk
           
     - name: Snapshot build deploy
-      if: github.event.inputs.release != 'true'
+      if: ${{ inputs.release == 'false' }}
       run: |
           cd moe-ci/moe/tools/master
           ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
           
     - name: Import GPG key
-      if: github.event.inputs.release == 'true'
+      if: ${{ inputs.release }}
       id: import_gpg
       uses: crazy-max/ghaction-import-gpg@1c6a9e9d3594f2d743f1b1dd7669ab0dfdffa922
       with:
@@ -123,7 +138,7 @@ jobs:
         passphrase: ${{ secrets.MOE_RELEASE_PRIVATE_KEY_PASSPHRASE }}
         
     - name: Release deploy
-      if: github.event.inputs.release == 'true'
+      if: ${{ inputs.release }}
       run: |
           cd moe-ci/moe/tools/master
           ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
