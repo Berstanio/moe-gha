@@ -33,7 +33,7 @@ jobs:
         run: echo "Building release version"
       
       - name: Test for snapshot
-        if: ${{ inputs.release == 'false' }}
+        if: ${{ inputs.release == false }}
         run: echo "Building snapshot version"
 
   prebuild:
@@ -124,7 +124,7 @@ jobs:
           ./gradlew sdk
           
     - name: Snapshot build deploy
-      if: ${{ inputs.release == 'false' }}
+      if: ${{ inputs.release == false }}
       run: |
           cd moe-ci/moe/tools/master
           ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
