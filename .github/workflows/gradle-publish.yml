@@ -64,14 +64,14 @@ jobs:
           cd moe-ci
           repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
           repo sync
-          cd prebuilts
+          cd moe/prebuilts
           ./gradlew llvm
           
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
           name: llvm
-          path: moe-ci/prebuilts/llvm/macos/lib/libclang.dylib
+          path: moe-ci/moe/prebuilts/llvm/macos/lib/libclang.dylib
   build:
     needs: [prebuild, verify-release-config]
     runs-on: macos-14
@@ -101,19 +101,19 @@ jobs:
           cd moe-ci
           repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
           repo sync
-          cd prebuilts
+          cd moe/prebuilts
           ./gradlew mingw
-          mkdir -p moe-ci/prebuilts/llvm/macos/lib/
+          mkdir -p moe-ci/moe/prebuilts/llvm/macos/lib/
 
     - uses: actions/download-artifact@v3
       with:
           name: llvm
-          path: moe-ci/prebuilts/llvm/macos/lib/
+          path: moe-ci/moe/prebuilts/llvm/macos/lib/
           
     - name: Inspect
       run: |
         ls -l
-        ls -l moe-ci/prebuilts/llvm/macos/lib/
+        ls -l moe-ci/moe/prebuilts/llvm/macos/lib/
 
     - name: Build MOE
       run: |
