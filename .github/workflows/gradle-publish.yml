@@ -117,17 +117,16 @@ jobs:
 
     - name: Build MOE
       run: |
-          cd moe-ci/moe/moe-core/
-          ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
-          ./gradlew build -Dorg.gradle.jvmargs=-Xmx2048m
-          cd ../tools/master/
-          ./gradlew sdk
+          cd moe-ci/moe/
+          ./gradlew :tools:moe-sdk:sdk
+          ./gradlew :tools:moe-sdk:sdk
           
     - name: Snapshot build deploy
       if: ${{ inputs.release == false }}
       run: |
-          cd moe-ci/moe/tools/master
-          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          cd moe-ci/moe/
+          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
           
     - name: Import GPG key
       if: ${{ inputs.release }}
@@ -140,7 +139,8 @@ jobs:
     - name: Release deploy
       if: ${{ inputs.release }}
       run: |
-          cd moe-ci/moe/tools/master
-          ./gradlew sdk publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          cd moe-ci/moe
+          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
 
       
