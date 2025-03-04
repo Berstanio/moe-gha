@@ -15,6 +15,14 @@ on:
         description: Whether to make a release
         default: false
         required: true
+      branch:
+        type: choice
+        description: Which branch to use
+        default: 'moe-master'
+        required: true
+        options:
+          - 'moe-master'
+          - 'moe-svm'
         
   
   release:
@@ -35,6 +43,9 @@ jobs:
       - name: Test for snapshot
         if: ${{ inputs.release == false }}
         run: echo "Building snapshot version"
+
+      - name: Echo selected branch
+        run: echo "Using branch ${{ inputs.branch }}"
 
   prebuild:
     runs-on: macos-15
@@ -64,7 +75,7 @@ jobs:
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
           mkdir moe-ci
           cd moe-ci
-          repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
+          repo init -u https://github.com/multi-os-engine/manifest.git -b ${{ inputs.branch }}
           repo sync
           cd moe/prebuilts
           ./gradlew llvm
@@ -103,7 +114,7 @@ jobs:
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
           mkdir moe-ci
           cd moe-ci
-          repo init -u https://github.com/multi-os-engine/manifest.git -b moe-master
+          repo init -u https://github.com/multi-os-engine/manifest.git -b ${{ inputs.branch }}
           repo sync
           cd moe/prebuilts
           ./gradlew mingw
@@ -114,11 +125,6 @@ jobs:
           name: llvm
           path: moe-ci/moe/prebuilts/llvm/macos/lib/
           
-    - name: Inspect
-      run: |
-        ls -l
-        ls -l moe-ci/moe/prebuilts/llvm/macos/lib/
-
     - name: Build MOE
       run: |
           cd moe-ci/moe/
