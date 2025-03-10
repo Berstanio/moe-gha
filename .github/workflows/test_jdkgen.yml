@@ -12,11 +12,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v3
       with:
-        java-version: 17
-        distribution: 'corretto'
+        java-version: 21
+        distribution: 'graalvm'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
@@ -24,7 +24,7 @@ jobs:
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_16.app /Applications/Xcode.app
+          sudo mv /Applications/Xcode_16.2.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
@@ -36,6 +36,7 @@ jobs:
     - name: Build MOE
       run: |
           cd moe-ci/moe/
-          ./gradlew :moe-core:moe.apple:moe.core.native:svm.openjdk:jdk_gensrc
+          ./gradlew :moe-core:moe.apple:moe.core.native:svm.openjdk:jdk_gensrc || true
+          cat /Users/runner/work/moe-gha/moe-gha/moe-ci/svm/labs-openjdk-21/build/labsjdk/make-support/failure-logs
           
       
