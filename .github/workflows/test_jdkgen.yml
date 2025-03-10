@@ -1,4 +1,4 @@
-name: Gradle Package
+name: Test JDK_Gen
 
 on:
   workflow_dispatch:        
