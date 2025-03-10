@@ -37,6 +37,6 @@ jobs:
       run: |
           cd moe-ci/moe/
           ./gradlew :moe-core:moe.apple:moe.core.native:svm.openjdk:jdk_gensrc || true
-          cat /Users/runner/work/moe-gha/moe-gha/moe-ci/svm/labs-openjdk-21/build/labsjdk/make-support/failure-logs
+          ls /Users/runner/work/moe-gha/moe-gha/moe-ci/svm/labs-openjdk-21/build/labsjdk/make-support/failure-logs
           
       
