@@ -148,4 +148,10 @@ jobs:
           ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
           ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
 
-      
+    - name: Trigger manual upload to Central Repository
+      if: ${{ inputs.release }}
+      run: |
+          curl -X POST \
+            -H "Authorization: Bearer $(echo -n '${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}' | base64)" \
+            -H "Content-Type: application/json" \
+            https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/org.multi-os-engine
