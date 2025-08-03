@@ -47,6 +47,11 @@ jobs:
       - name: Echo selected branch
         run: echo "Using branch ${{ inputs.branch }}"
 
+      - name: Get public IP address
+        run: |
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
+
+
   prebuild:
     runs-on: macos-15
     permissions:
