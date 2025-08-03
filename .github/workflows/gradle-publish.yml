@@ -152,6 +152,6 @@ jobs:
       if: ${{ inputs.release }}
       run: |
           curl -X POST \
-            -H "Authorization: Bearer $(echo -n '${{ secrets.ossrhUsername }}:${{ secrets.ossrhPassword }}' | base64)" \
+            -H "Authorization: Bearer $(printf "%s:%s" "${{ secrets.ossrhUsername }}" "${{ secrets.ossrhPassword }}" | base64)" \
             -H "Content-Type: application/json" \
             https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/org.multi-os-engine
