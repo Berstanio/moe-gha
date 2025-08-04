@@ -47,11 +47,6 @@ jobs:
       - name: Echo selected branch
         run: echo "Using branch ${{ inputs.branch }}"
 
-      - name: Get public IP address
-        run: |
-          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-
-
   prebuild:
     runs-on: macos-15
     permissions:
@@ -104,6 +99,10 @@ jobs:
         distribution: 'graalvm'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+    
+    - name: Get public IP address
+      run: |
+        echo "Public IP: $(curl -s https://ipinfo.io/ip)"
 
     - name: Setup prebuild
       run: |
