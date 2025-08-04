@@ -149,12 +149,16 @@ jobs:
       if: ${{ inputs.release }}
       run: |
           cd moe-ci/moe
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
           ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
           ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
 
     - name: Trigger manual upload to Central Repository
       if: ${{ inputs.release }}
       run: |
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
           curl -X POST \
             -H "Authorization: Bearer $(printf "%s:%s" "${{ secrets.ossrhUsername }}" "${{ secrets.ossrhPassword }}" | base64)" \
             -H "Content-Type: application/json" \
