@@ -5,7 +5,7 @@
 # This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
 
-name: Gradle Package
+name: Build MOE 2
 
 on:
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
         run: echo "Using branch ${{ inputs.branch }}"
 
   prebuild:
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       contents: read
       packages: write
@@ -67,7 +67,7 @@ jobs:
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_16.2.app /Applications/Xcode.app
+          sudo mv /Applications/Xcode_26.1.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
@@ -85,7 +85,7 @@ jobs:
           path: moe-ci/moe/prebuilts/llvm/macos/lib/libclang.dylib
   build:
     needs: [prebuild, verify-release-config]
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       contents: read
       packages: write
@@ -104,11 +104,11 @@ jobs:
       run: |
         echo "Public IP: $(curl -s https://ipinfo.io/ip)"
 
-    - name: Setup prebuild
+    - name: Setup
       run: |
           sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
           sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
-          sudo mv /Applications/Xcode_16.2.app /Applications/Xcode.app
+          sudo mv /Applications/Xcode_26.1.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
@@ -116,8 +116,6 @@ jobs:
           cd moe-ci
           repo init -u https://github.com/multi-os-engine/manifest.git -b ${{ inputs.branch }}
           repo sync
-          cd moe
-          ./gradlew :prebuilts:mingw
 
     - uses: actions/download-artifact@v4
       with:
@@ -128,13 +126,13 @@ jobs:
       run: |
           cd moe-ci/moe/
           ./gradlew :tools:moe-sdk:sdk
-          ./gradlew :tools:moe-sdk:sdk
           
     - name: Snapshot build deploy
       if: ${{ inputs.release == false }}
       run: |
           cd moe-ci/moe/
-          ./gradlew :tools:moe-sdk:publish :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
+          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
           
     - name: Import GPG key
       if: ${{ inputs.release }}
@@ -149,7 +147,9 @@ jobs:
       run: |
           cd moe-ci/moe
           echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-          ./gradlew :tools:moe-sdk:publish :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
+          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
+          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
           echo "Public IP: $(curl -s https://ipinfo.io/ip)"
 
     - name: Trigger manual upload to Central Repository
