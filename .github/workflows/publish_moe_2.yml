@@ -18,10 +18,9 @@ on:
       branch:
         type: choice
         description: Which branch to use
-        default: 'moe-master'
+        default: 'moe-svm'
         required: true
         options:
-          - 'moe-master'
           - 'moe-svm'
         
   
@@ -34,18 +33,15 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - name: Test for release
         if: ${{ inputs.release }}
         run: echo "Building release version"
-      
+
       - name: Test for snapshot
         if: ${{ inputs.release == false }}
         run: echo "Building snapshot version"
-
-      - name: Echo selected branch
-        run: echo "Using branch ${{ inputs.branch }}"
 
   prebuild:
     runs-on: macos-26
@@ -77,7 +73,7 @@ jobs:
           repo sync
           cd moe
           ./gradlew :prebuilts:llvm
-          
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -99,10 +95,6 @@ jobs:
         distribution: 'graalvm'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-    
-    - name: Get public IP address
-      run: |
-        echo "Public IP: $(curl -s https://ipinfo.io/ip)"
 
     - name: Setup
       run: |
@@ -114,26 +106,19 @@ jobs:
           brew install autogen autoconf automake libtool pkg-config wget isl cloog cmake gpg ant maven mpfr libmpc repo premake texinfo
           mkdir moe-ci
           cd moe-ci
-          repo init -u https://github.com/multi-os-engine/manifest.git -b ${{ inputs.branch }}
+          repo init -u https://github.com/multi-os-engine/manifest.git -b moe-svm
           repo sync
 
     - uses: actions/download-artifact@v4
       with:
           name: llvm
           path: moe-ci/moe/prebuilts/llvm/macos/lib/
-          
+
     - name: Build MOE
       run: |
           cd moe-ci/moe/
           ./gradlew :tools:moe-sdk:sdk
-          
-    - name: Snapshot build deploy
-      if: ${{ inputs.release == false }}
-      run: |
-          cd moe-ci/moe/
-          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
-          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }}
-          
+
     - name: Import GPG key
       if: ${{ inputs.release }}
       id: import_gpg
@@ -141,22 +126,18 @@ jobs:
       with:
         gpg-private-key: ${{ secrets.MOE_RELEASE_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOE_RELEASE_PRIVATE_KEY_PASSPHRASE }}
-        
-    - name: Release deploy
-      if: ${{ inputs.release }}
+
+    - name: Publish to Maven Central
+      env:
+        ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ossrhUsername }}
+        ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ossrhPassword }}
       run: |
           cd moe-ci/moe
-          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-          ./gradlew :tools:moe-sdk:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
-          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-          ./gradlew :tools:moe-gradle:publish -PossrhUsername=${{ secrets.ossrhUsername }} -PossrhPassword=${{ secrets.ossrhPassword }} -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
-          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-
-    - name: Trigger manual upload to Central Repository
-      if: ${{ inputs.release }}
-      run: |
-          echo "Public IP: $(curl -s https://ipinfo.io/ip)"
-          curl -X POST \
-            -H "Authorization: Bearer $(printf "%s:%s" "${{ secrets.ossrhUsername }}" "${{ secrets.ossrhPassword }}" | base64)" \
-            -H "Content-Type: application/json" \
-            https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/org.multi-os-engine
+          if [ "${{ inputs.release }}" = "true" ]; then
+            ./gradlew :tools:moe-sdk:publishAndReleaseToMavenCentral :tools:moe-gradle:publishAndReleaseToMavenCentral \
+              -PRELEASE -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }} \
+              --no-configuration-cache
+          else
+            ./gradlew :tools:moe-sdk:publishAllPublicationsToMavenCentralRepository :tools:moe-gradle:publishAllPublicationsToMavenCentralRepository \
+              --no-configuration-cache
+          fi
