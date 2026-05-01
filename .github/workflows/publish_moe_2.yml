@@ -134,10 +134,7 @@ jobs:
       run: |
           cd moe-ci/moe
           if [ "${{ inputs.release }}" = "true" ]; then
-            ./gradlew :tools:moe-sdk:publishAndReleaseToMavenCentral :tools:moe-gradle:publishAndReleaseToMavenCentral \
-              -PRELEASE -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }} \
-              --no-configuration-cache
+            ./gradlew :tools:moe-sdk:publishAndReleaseToMavenCentral :tools:moe-gradle:publishAndReleaseToMavenCentral -PRELEASE -Psigning.gnupg.keyId=${{ secrets.MOE_RELEASE_PRIVATE_KEY_ID }}
           else
-            ./gradlew :tools:moe-sdk:publishAllPublicationsToMavenCentralRepository :tools:moe-gradle:publishAllPublicationsToMavenCentralRepository \
-              --no-configuration-cache
+            ./gradlew :tools:moe-sdk:publishAllPublicationsToMavenCentralRepository :tools:moe-gradle:publishAllPublicationsToMavenCentralRepository
           fi
